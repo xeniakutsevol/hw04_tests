@@ -144,3 +144,13 @@ dmypy.json
 .history/
 
 .mypy_cache
+
+# Статика
+yatube/static/
+
+# Покрытие тестами
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+*.cover
