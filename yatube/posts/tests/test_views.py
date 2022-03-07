@@ -100,7 +100,7 @@ class PostViewTests(TestCase):
                 response = self.guest_client.get(reverse_name)
                 self.assertEqual(len(response.context['page_obj']),
                                  POSTS_PER_PAGE)
-                last_post = Post.objects.order_by('-pub_date').first()
+                last_post = Post.objects.first()
                 first_object = response.context['page_obj'][0]
                 post_author_0 = first_object.author.username
                 post_text_0 = first_object.text
@@ -123,9 +123,9 @@ class PostViewTests(TestCase):
                          f'{PostViewTests.post.group}')
         self.assertEqual(response.context.get('post').pk,
                          PostViewTests.post.pk)
-        self.assertEqual((
-            response.context.get('post').pub_date).strftime("%Y:%m:%d"),
-            (PostViewTests.post.pub_date).strftime("%Y:%m:%d"))
+        self.assertEqual(
+            response.context.get('post').pub_date,
+            PostViewTests.post.pub_date)
         author_posts_count = Post.objects.filter(
             author=PostViewTests.post.author).count()
         self.assertEqual(response.context.get('author_posts_count'),
