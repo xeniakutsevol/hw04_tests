@@ -44,7 +44,26 @@ class PostFormTests(TestCase):
         self.author_client = Client()
         self.author_client.force_login(User.objects.get(username='auth'))
 
-    def test_create_post(self):
+    def test_create_post_anon_user(self):
+        """Незарегистрированный пользователь не может создать пост."""
+        form_data = {
+            'author': PostFormTests.post.author,
+            'text': PostFormTests.post.text,
+            'pk': PostFormTests.post.pk,
+            'group': PostFormTests.post.group.id,
+            'pub_date': PostFormTests.post.pub_date
+        }
+
+        response_guest = self.guest_client.post(
+            reverse('posts:post_create'),
+            data=form_data,
+            follow=True
+        )
+        self.assertRedirects(response_guest,
+                             '/auth/login/?next=/create/')
+
+
+    def test_create_post_auth_user(self):
         """Валидная форма создает новый пост."""
         posts_count = Post.objects.count()
 
@@ -61,17 +80,10 @@ class PostFormTests(TestCase):
             data=form_data,
             follow=True
         )
-        response_guest = self.guest_client.post(
-            reverse('posts:post_create'),
-            data=form_data,
-            follow=True
-        )
 
         self.assertRedirects(response,
                              reverse('posts:profile', kwargs={'username':
                                      f'{PostFormTests.post.author.username}'}))
-        self.assertRedirects(response_guest,
-                             '/auth/login/?next=/create/')
         self.assertEqual(Post.objects.count(), posts_count + 1)
         self.assertTrue(
             Post.objects.filter(
@@ -83,7 +95,26 @@ class PostFormTests(TestCase):
             ).exists()
         )
 
-    def test_post_edit(self):
+    def test_post_edit_anon_user(self):
+        form_data = {
+            'author': PostFormTests.post.author,
+            'text': 'Новый текст',
+            'pk': PostFormTests.post.pk,
+            'group': PostFormTests.group.id,
+            'pub_date': PostFormTests.post.pub_date
+        }
+
+        response_guest = self.guest_client.post(
+            reverse('posts:post_edit', kwargs={'post_id':
+                    f'{PostFormTests.post.pk}'}),
+            data=form_data,
+            follow=True
+        )
+
+        self.assertRedirects(response_guest, f'/auth/login/?next=/posts/'
+                             f'{PostFormTests.post.pk}/edit/')
+
+    def test_post_edit_auth_user(self):
         posts_count = Post.objects.count()
 
         form_data = {
@@ -100,17 +131,9 @@ class PostFormTests(TestCase):
             data=form_data,
             follow=True
         )
-        response_guest = self.guest_client.post(
-            reverse('posts:post_edit', kwargs={'post_id':
-                    f'{PostFormTests.post.pk}'}),
-            data=form_data,
-            follow=True
-        )
 
         self.assertRedirects(response, reverse('posts:post_detail',
                              kwargs={'post_id': f'{PostFormTests.post.pk}'}))
-        self.assertRedirects(response_guest, f'/auth/login/?next=/posts/'
-                             f'{PostFormTests.post.pk}/edit/')
         self.assertEqual(Post.objects.count(), posts_count)
         self.assertTrue(
             Post.objects.filter(
