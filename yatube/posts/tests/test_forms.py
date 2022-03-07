@@ -109,7 +109,8 @@ class PostFormTests(TestCase):
 
         self.assertRedirects(response, reverse('posts:post_detail',
                              kwargs={'post_id': f'{PostFormTests.post.pk}'}))
-        self.assertRedirects(response_guest, f'/auth/login/?next=/posts/{PostFormTests.post.pk}/edit/')
+        self.assertRedirects(response_guest, f'/auth/login/?next=/posts/'
+                             f'{PostFormTests.post.pk}/edit/')
         self.assertEqual(Post.objects.count(), posts_count)
         self.assertTrue(
             Post.objects.filter(
