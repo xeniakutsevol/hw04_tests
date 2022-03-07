@@ -62,7 +62,6 @@ class PostFormTests(TestCase):
         self.assertRedirects(response_guest,
                              '/auth/login/?next=/create/')
 
-
     def test_create_post_auth_user(self):
         """Валидная форма создает новый пост."""
         posts_count = Post.objects.count()
